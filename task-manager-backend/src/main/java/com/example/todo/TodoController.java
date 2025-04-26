@@ -1,11 +1,11 @@
 package com.example.todo;
 
+import com.example.todo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -13,32 +13,28 @@ import java.util.Optional;
 public class TodoController {
 
     @Autowired
-    private TodoRepository todoRepository;
+    private TodoService todoService;
 
     @GetMapping
     public List<Todo> getAllTodos() {
-        return todoRepository.findAll();
+        return todoService.getAllTodos();
     }
 
     @PostMapping
     public Todo createTodo(@RequestBody Todo todo) {
-        return todoRepository.save(todo);
+        return todoService.createTodo(todo);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTodo(@PathVariable Long id) {
-        todoRepository.deleteById(id);
+    public void deleteTodo(@PathVariable String id) {
+        todoService.deleteTodo(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Todo> updateTodo(@PathVariable Long id, @RequestBody Todo todo) {
-        Optional<Todo> existingTodo = todoRepository.findById(id);
-
-        if (existingTodo.isPresent()) {
-            Todo updatedTodo = existingTodo.get();
-            updatedTodo.setText(todo.getText());
-            updatedTodo.setCompleted(todo.isCompleted());
-            return ResponseEntity.ok(todoRepository.save(updatedTodo));
+    public ResponseEntity<Todo> updateTodo(@PathVariable String id, @RequestBody Todo todo) {
+        Todo updatedTodo = todoService.updateTodo(id, todo);
+        if (updatedTodo != null) {
+            return ResponseEntity.ok(updatedTodo);
         } else {
             return ResponseEntity.notFound().build();
         }
