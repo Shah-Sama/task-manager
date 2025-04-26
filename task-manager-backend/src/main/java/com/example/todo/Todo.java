@@ -1,19 +1,8 @@
 package com.example.todo;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-
-@DynamoDBTable(tableName = "Todos")
 public class Todo {
-
-    @DynamoDBHashKey
     private String id;
-
-    @DynamoDBAttribute
     private String text;
-
-    @DynamoDBAttribute
     private boolean completed;
 
     public Todo() {

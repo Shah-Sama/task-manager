@@ -20,14 +20,41 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 
-// Create a theme instance
+// Create a theme instance with light green colors
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#81c784', // Light green
+      light: '#b2fab4',
+      dark: '#519657',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#a5d6a7', // Lighter green
+      light: '#d7ffd9',
+      dark: '#75a478',
+    },
+    background: {
+      default: '#f1f8e9', // Very light green
+      paper: '#ffffff',
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#81c784',
+          '&:hover': {
+            backgroundColor: '#519657',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#f1f8e9',
+        },
+      },
     },
   },
 });
@@ -36,10 +63,27 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
 
+  const fetchTodos = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/todos');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setTodos(data);
+      } else {
+        console.error('Received data is not an array:', data);
+        setTodos([]);
+      }
+    } catch (error) {
+      console.error('Error fetching todos:', error);
+      setTodos([]);
+    }
+  };
+
   useEffect(() => {
-    fetch('http://localhost:8080/api/todos')
-      .then(res => res.json())
-      .then(data => setTodos(data));
+    fetchTodos();
   }, []);
 
   const addTodo = () => {
