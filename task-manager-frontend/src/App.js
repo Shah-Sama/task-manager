@@ -1,23 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
 
 function App() {
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState('');
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/todos')
+      .then(res => res.json())
+      .then(data => setTodos(data));
+  }, []);
+
+  const addTodo = () => {
+    fetch('http://localhost:8080/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: newTodo })
+    }).then(() => {
+      setTodos([...todos, { text: newTodo }]);
+      setNewTodo('');
+    });
+  };
+
+  const deleteTodo = (id) => {
+    fetch(`http://localhost:8080/api/todos/${id}`, {
+      method: 'DELETE'
+    }).then(() => {
+      setTodos(todos.filter(todo => todo.id !== id));
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ padding: 20 }}>
+      <h1>To-Do List</h1>
+      <input
+        value={newTodo}
+        onChange={e => setNewTodo(e.target.value)}
+        placeholder="Enter a task"
+      />
+      <button onClick={addTodo}>Add</button>
+      <ul>
+        {todos.map(todo => (
+          <li key={todo.id}>
+            {todo.text} <button onClick={() => deleteTodo(todo.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
