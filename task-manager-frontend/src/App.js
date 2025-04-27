@@ -67,7 +67,7 @@ function App() {
   const fetchTodos = async () => {
     try {
       console.log('Fetching todos...');
-      const response = await fetch('http://localhost:8080/api/todos');
+      const response = await fetch('http://54.88.239.180/api/todos');
       console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -95,7 +95,7 @@ function App() {
     
     console.log('Adding new todo:', { title: newTodo, description: newDescription });
     
-    fetch('http://localhost:8080/api/todos', {
+    fetch('http://54.88.239.180/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -121,7 +121,7 @@ function App() {
 
   const deleteTodo = (id) => {
     console.log('Deleting todo:', id);
-    fetch(`http://localhost:8080/api/todos/${id}`, {
+    fetch(`http://54.88.239.180/api/todos/${id}`, {
       method: 'DELETE'
     }).then(() => {
       setTodos(todos.filter(todo => todo.id !== id));
@@ -130,7 +130,7 @@ function App() {
 
   const toggleComplete = (id) => {
     console.log('Toggling todo:', id);
-    fetch(`http://localhost:8080/api/todos/${id}/toggle`, {
+    fetch(`http://54.88.239.180/api/todos/${id}/toggle`, {
       method: 'PUT'
     }).then(res => res.json())
       .then(updatedTodo => {
