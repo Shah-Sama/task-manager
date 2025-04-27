@@ -22,7 +22,7 @@ public class TodoController {
 
     @PostMapping
     public Todo createTodo(@RequestBody Todo todo) {
-        return todoService.createTodo(todo);
+        return todoService.createTodo(todo.getTitle(), todo.getDescription());
     }
 
     @DeleteMapping("/{id}")
@@ -32,7 +32,17 @@ public class TodoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Todo> updateTodo(@PathVariable String id, @RequestBody Todo todo) {
-        Todo updatedTodo = todoService.updateTodo(id, todo);
+        Todo updatedTodo = todoService.updateTodo(id, todo.getTitle(), todo.getDescription(), todo.isCompleted());
+        if (updatedTodo != null) {
+            return ResponseEntity.ok(updatedTodo);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}/toggle")
+    public ResponseEntity<Todo> toggleTodo(@PathVariable String id) {
+        Todo updatedTodo = todoService.toggleTodo(id);
         if (updatedTodo != null) {
             return ResponseEntity.ok(updatedTodo);
         } else {
