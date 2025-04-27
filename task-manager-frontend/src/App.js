@@ -62,14 +62,18 @@ const theme = createTheme({
 function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
+  const [newDescription, setNewDescription] = useState('');
 
   const fetchTodos = async () => {
     try {
+      console.log('Fetching todos...');
       const response = await fetch('http://localhost:8080/api/todos');
+      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
+      console.log('Received data:', data);
       if (Array.isArray(data)) {
         setTodos(data);
       } else {
@@ -89,18 +93,34 @@ function App() {
   const addTodo = () => {
     if (newTodo.trim() === '') return;
     
+    console.log('Adding new todo:', { title: newTodo, description: newDescription });
+    
     fetch('http://localhost:8080/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: newTodo })
-    }).then(res => res.json())
-      .then(data => {
-        setTodos([...todos, data]);
-        setNewTodo('');
-      });
+      body: JSON.stringify({ 
+        title: newTodo,
+        description: newDescription,
+        completed: false
+      })
+    })
+    .then(res => {
+      console.log('Add todo response status:', res.status);
+      return res.json();
+    })
+    .then(data => {
+      console.log('Add todo response data:', data);
+      setTodos([...todos, data]);
+      setNewTodo('');
+      setNewDescription('');
+    })
+    .catch(error => {
+      console.error('Error adding todo:', error);
+    });
   };
 
   const deleteTodo = (id) => {
+    console.log('Deleting todo:', id);
     fetch(`http://localhost:8080/api/todos/${id}`, {
       method: 'DELETE'
     }).then(() => {
@@ -109,105 +129,93 @@ function App() {
   };
 
   const toggleComplete = (id) => {
-    const todo = todos.find(t => t.id === id);
-    if (!todo) return;
-
-    const updatedTodo = {
-      ...todo,
-      completed: !todo.completed
-    };
-
-    fetch(`http://localhost:8080/api/todos/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(updatedTodo)
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(updatedTodo => {
-      setTodos(todos.map(t => t.id === id ? updatedTodo : t));
-    })
-    .catch(error => {
-      console.error('Error updating todo:', error);
-      // Revert the UI state if the update failed
-      setTodos([...todos]);
-    });
+    console.log('Toggling todo:', id);
+    fetch(`http://localhost:8080/api/todos/${id}/toggle`, {
+      method: 'PUT'
+    }).then(res => res.json())
+      .then(updatedTodo => {
+        setTodos(todos.map(todo => 
+          todo.id === id ? updatedTodo : todo
+        ));
+      });
   };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Task Manager
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        
-        <Container maxWidth="sm" sx={{ mt: 4 }}>
-          <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                label="Add a new task"
-                value={newTodo}
-                onChange={(e) => setNewTodo(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Task Manager
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="sm" sx={{ mt: 4 }}>
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="New Task"
+              variant="outlined"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              fullWidth
+            />
+            <TextField
+              label="Description"
+              variant="outlined"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              fullWidth
+              multiline
+              rows={2}
+            />
+            <Button
+              variant="contained"
+              onClick={addTodo}
+              startIcon={<AddIcon />}
+            >
+              Add Task
+            </Button>
+          </Box>
+        </Paper>
+        <List>
+          {todos.map(todo => (
+            <ListItem
+              key={todo.id}
+              sx={{
+                mb: 1,
+                bgcolor: 'background.paper',
+                borderRadius: 1,
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              }}
+            >
+              <Checkbox
+                checked={todo.completed}
+                onChange={() => toggleComplete(todo.id)}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={addTodo}
-                startIcon={<AddIcon />}
-                sx={{ minWidth: '100px' }}
-              >
-                Add
-              </Button>
-            </Box>
-          </Paper>
-
-          <Paper elevation={3}>
-            <List>
-              {todos.map(todo => (
-                <ListItem
-                  key={todo.id}
-                  divider
-                  sx={{
-                    textDecoration: todo.completed ? 'line-through' : 'none',
-                    opacity: todo.completed ? 0.7 : 1
-                  }}
+              <ListItemText
+                primary={todo.title}
+                secondary={todo.description}
+                sx={{
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: todo.completed ? 'text.secondary' : 'text.primary',
+                }}
+              />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => deleteTodo(todo.id)}
                 >
-                  <Checkbox
-                    checked={todo.completed}
-                    onChange={() => toggleComplete(todo.id)}
-                  />
-                  <ListItemText primary={todo.text} />
-                  <ListItemSecondaryAction>
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => deleteTodo(todo.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Container>
-      </Box>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+      </Container>
     </ThemeProvider>
   );
 }
