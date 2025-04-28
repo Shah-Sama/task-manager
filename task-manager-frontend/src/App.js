@@ -19,6 +19,7 @@ import {
   createTheme
 } from '@mui/material';
 import { Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import XPBar from './components/XPBar';
 
 // Create a theme instance with light green colors
 const theme = createTheme({
@@ -63,6 +64,11 @@ function App() {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [userStats, setUserStats] = useState({
+    xp: 0,
+    level: 1,
+    tasksCompleted: 0
+  });
 
   const fetchTodos = async () => {
     try {
@@ -86,8 +92,22 @@ function App() {
     }
   };
 
+  const fetchUserStats = async () => {
+    try {
+      const response = await fetch('http://54.88.239.180/api/users/stats');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setUserStats(data);
+    } catch (error) {
+      console.error('Error fetching user stats:', error);
+    }
+  };
+
   useEffect(() => {
     fetchTodos();
+    fetchUserStats();
   }, []);
 
   const addTodo = () => {
@@ -137,6 +157,8 @@ function App() {
         setTodos(todos.map(todo => 
           todo.id === id ? updatedTodo : todo
         ));
+        // Fetch updated stats after completing a task
+        fetchUserStats();
       });
   };
 
@@ -151,6 +173,11 @@ function App() {
         </Toolbar>
       </AppBar>
       <Container maxWidth="sm" sx={{ mt: 4 }}>
+        <XPBar 
+          xp={userStats.xp}
+          level={userStats.level}
+          tasksCompleted={userStats.tasksCompleted}
+        />
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
