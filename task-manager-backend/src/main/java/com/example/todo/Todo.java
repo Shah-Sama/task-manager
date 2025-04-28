@@ -10,6 +10,8 @@ public class Todo {
     private String description;
     private boolean completed;
     private String createdAt;
+    private String userId;
+    private int xp;
 
     public Todo() {
     }
@@ -20,6 +22,7 @@ public class Todo {
         this.description = description;
         this.completed = completed;
         this.createdAt = createdAt;
+        this.xp = 0;
     }
 
     @DynamoDbPartitionKey
@@ -61,5 +64,21 @@ public class Todo {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public int getXp() {
+        return xp;
+    }
+
+    public void setXp(int xp) {
+        this.xp = xp;
     }
 }
