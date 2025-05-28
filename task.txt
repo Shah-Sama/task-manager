@@ -1,5 +1,6 @@
 Test sync Sun May 25 22:58:11 PDT 2025
 hello this is a test
 has this line been added
-fjdsaklfjdskfdlsajfdsakfjdfks;lfjdsfklas
 has this line been added
+Trace(member)
+this doesnt have the key word
