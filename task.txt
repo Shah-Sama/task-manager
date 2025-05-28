@@ -4,3 +4,6 @@ has this line been added
 has this line been added
 Trace(member)
 this doesnt have the key word
+sdfsamember
+fjdsklfjsadklf
+member<>
